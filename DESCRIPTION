@@ -1,0 +1,16 @@
+Package: mrdd
+Title: Estimating Multidimensional Regression Discontinuity Design Using Thin Plate Regression Splines
+Version: 0.0.0.9000
+Authors@R: 
+    person("Alden", "Cheng", , "alden15@mit.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-0290-763X"))
+Description: This package implements the estimation method for regression discontinuity designs with two running variables, as described in Cheng (2020). This involves estimating two separate thin plate regression splines (TPRS) using observations with values of the running variables that make them eligible or ineligible for treatment respectively. The estimate of the conditional average treatment effect (as a function of the two running variables) is the difference between the two TPRS at the "treatment frontier" (i.e. the border separating values of the running variables that are eligible or ineligible for treatment).
+License: use_mit_license()
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+Imports:
+	mgcv,
+	locfit,
+	ggplot2,
+	Hmisc
