@@ -379,24 +379,24 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
           bs_est_us[[e]]$agg[[3]][b] = current_bs_est$tau_us[[e]]$agg[[3]]
         }
       }
-    }else{
-      # Do density estimation
-      if (is.null(pred_dfs)){
-        bs_pred_dfs = list(data.frame(bs_X1=0, bs_X2=F1.range),
-                           data.frame(bs_X2=0, bs_X1=F2.range))
-      }else{
-        bs_pred_dfs = list(data.frame(bs_X1 = pred_dfs[[1]]$X1, bs_X2 = pred_dfs[[1]]$X2),
-                           data.frame(bs_X1 = pred_dfs[[2]]$X1, bs_X2 = pred_dfs[[2]]$X2))
-      }
-      kernel_est = list(preds = list(), mass = list())
-      kernel_density_est = locfit(~ bs_X1 + bs_X2)
-      for (f in 1:2){
-        kernel_est$preds[[f]] = predict(kernel_density_est, bs_pred_dfs[[f]])
-        kernel_est$mass[[f]] = kernel_est$preds[[f]]/sum(kernel_est$preds[[f]])
-      }
-      kernel_est$mass[[3]] = c(kernel_est$preds[[1]],kernel_est$preds[[2]])/
-        sum(c(kernel_est$preds[[1]],kernel_est$preds[[2]]))
     }
+    # Do density estimation
+    if (is.null(pred_dfs)){
+      bs_pred_dfs = list(data.frame(bs_X1=0, bs_X2=F1.range),
+                         data.frame(bs_X2=0, bs_X1=F2.range))
+    }else{
+      bs_pred_dfs = list(data.frame(bs_X1 = pred_dfs[[1]]$X1, bs_X2 = pred_dfs[[1]]$X2),
+                         data.frame(bs_X1 = pred_dfs[[2]]$X1, bs_X2 = pred_dfs[[2]]$X2))
+    }
+    kernel_est = list(preds = list(), mass = list())
+    kernel_density_est = locfit(~ bs_X1 + bs_X2)
+    for (f in 1:2){
+      kernel_est$preds[[f]] = predict(kernel_density_est, bs_pred_dfs[[f]])
+      kernel_est$mass[[f]] = kernel_est$preds[[f]]/sum(kernel_est$preds[[f]])
+    }
+    kernel_est$mass[[3]] = c(kernel_est$preds[[1]],kernel_est$preds[[2]])/
+      sum(c(kernel_est$preds[[1]],kernel_est$preds[[2]]))
+    
     if (save_density_est){
       for (f in 1:3){
         bs_est$density_est[[f]][,b] = kernel_est$mass[[f]]
