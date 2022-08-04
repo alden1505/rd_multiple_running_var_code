@@ -6,4 +6,5 @@ devtools::install_github("alden1505/rd_multiple_running_var_code")
 The two main functions are mrdd.fn (which estimates the two-dimensional RD), and create_plot (which generates plots based on the estimates).
 
 **References**
+
 Cheng, Alden, 2020. "Regression Discontinuity Designs with Multiple Running Variables." Working Paper.
