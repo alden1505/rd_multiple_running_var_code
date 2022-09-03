@@ -16,21 +16,21 @@ create_plot(
 )
 }
 \arguments{
-\item{x}{range for running variable}
+\item{x}{The input should be a vector containing the points at which the user wants to plot the conditional average treatment effect (CATE). To elaborate, the CATE can only be calculated at the boundary where one of the running variables is zero, and the other takes positive values, and this option specifies at which positive values the CATE should be plotted.}
 
-\item{est}{estimates of the treatment effects}
+\item{est}{The input should be a vector containing treatment effect estimates, which should be the same length as x.}
 
-\item{se}{standard error of estimated treatment effects}
+\item{se}{The input should be a vector containing point-wise standard errors for the treatment effect estimates, which should be the same length as x.}
 
-\item{legend}{title for legend}
+\item{legend}{The input be the title for legend.}
 
-\item{reverse}{reverse the running variable, defaults to FALSE}
+\item{reverse}{The input should be a logical value (TRUE or FALSE) indicating whether the running variable is reversed (i.e. negative values are treated). If not specified, the option defaults to FALSE.}
 
-\item{my.colors}{specify desired colors for plot, defaults to black}
+\item{my.colors}{The input should be the desired colors for plot. If left empty, the default color is black.}
 
-\item{my_xlab}{title for x-axis}
+\item{my_xlab}{The input should be the title of the x-axis.}
 
-\item{my_ylab}{title for y-axis}
+\item{my_ylab}{The input should be the title of the y-axis.}
 }
 \description{
 create_plot is a function that takes in the range for a running variable,

@@ -6,24 +6,24 @@
 #' @import mgcv
 #' @import Hmisc
 #' @import ggplot2
-#' @param Y outcome variable
-#' @param X1 first running variable
-#' @param X2 second running variable
-#' @param W whether the observation is treated. defaults to NULL, but must be specified if the fuzzy option is TRUE
-#' @param F1.range range for the first running variable, defaults to NULL in which case the range is set to 0 to max(X1) with equal intervals
-#' @param F2.range range for the second running variable, defaults to NULL in which case the range is set to 0 to max(X2) with equal intervals
-#' @param R1 indices for observations in treated region, defaults to NULL
-#' @param R2 indices for observations in untreated region, defaults to NULL
-#' @param K parameter controlling the penalization for thin plate regression splines, defaults to -1
-#' @param save_bayes_se indicate whether Bayesian standard errors should be saved
-#' @param fuzzy specify whether this is a fuzzy RD, defaults to FALSE
-#' @param reverse specify whether the running variables are reversed (i.e. negative values are treated), defaults to FALSE
-#' @param sp parameter for thin plate regression spline fitting
-#' @param save_fits specify whether fitted thin plate regression splines should be saved, defaults to true
-#' @param save_density_est specify whether kernel density estimates should be saved, defaults to TRUE
-#' @param pred_dfs specify a dataframe with the values of the running variables that treatment effects should be predicted at, defaults to NULL
-#' @param undersmooth specify whether thin plate regression splines should be undersmoothed to reduce bias
-#' @param save_sp specify whether the parameter for thin plate regregression spline fitting should be saved, defaults to TRUE
+#' @param Y Y is a vector for the dependent variable.
+#' @param X1 X1 is a vector for the first running variable.
+#' @param X2 X2 is a vector for the second running variable.
+#' @param W W is a vector containing dummy variables for whether the observation is treated. This defaults to NULL, and it is assumed to be a sharp RD where a unit is treated if and only if both running variables exceed their threshold. If it is in fact a fuzzy RD (so the fuzzy option is specified to be TRUE), then W must be specified.
+#' @param F1.range This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X2=0, and X1 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X1=0 to max(X1), at equal intervals.
+#' @param F2.range This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X1=0, and X2 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X2=0 to max(X2), at equal intervals.
+#' @param R1 The input for this option should be a vector containing indices for observations in treated region. Typically, this can be left blank, in which case R1 defaults to NULL.
+#' @param R2 The input for this option should be a vector containing indices for observations in untreated region. Typically, this can be left blank, in which case R2 defaults to NULL.
+#' @param K This is a parameter controlling the penalization for thin plate regression splines. Typically this is left empty, in which case K defaults to -1.
+#' @param save_bayes_se The input should be a logical value (TRUE or FALSE) indicating whether Bayesian standard errors should be saved.
+#' @param fuzzy The input should be a logical value (TRUE or FALSE) indicating whether this is a fuzzy RD. If this is not specified, the option defaults to FALSE (so the code assumes that this is a sharp RD).
+#' @param reverse The input should be a logical value (TRUE or FALSE) indicating whether the running variables are reversed (i.e. negative values are treated). If not specified, the option defaults to FALSE.
+#' @param sp This is a parameter for thin plate regression spline fitting, and can typically be left empty (in which case it defaults to NULL).
+#' @param save_fits The input should be a logical value indicating whether the fitted thin plate regression splines should be saved. If the option is not specified, it defaults to TRUE.
+#' @param save_density_est The input should be a logical value indicating whether kernel density estimates should be saved. If the option is not specified, it defaults to TRUE.
+#' @param pred_dfs The input should be a dataframe with the values of the running variables that conditional average treatment effects should be calculated at. If left empty, it defaults to NULL.
+#' @param undersmooth The input should be a logical value indicating whether thin plate regression splines should be undersmoothed, in order to reduce bias (for inference purposes).
+#' @param save_sp The input should be a logical value indicating whether the parameter for thin plate regression spline fitting should be saved. If not specified, it defaults to TRUE.
 #' @keywords basic_mrd_est
 #' @export
 
@@ -256,26 +256,26 @@ basic_est = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
 #' @import mgcv
 #' @import Hmisc
 #' @import ggplot2
-#' @param Y outcome variable
-#' @param X1 first running variable
-#' @param X2 second running variable
-#' @param W whether the observation is treated. defaults to NULL, but must be specified if the fuzzy option is TRUE
-#' @param F1.range range for the first running variable, defaults to NULL in which case the range is set to 0 to max(X1) with equal intervals
-#' @param F2.range range for the second running variable, defaults to NULL in which case the range is set to 0 to max(X2) with equal intervals
-#' @param R1 indices for observations in treated region, defaults to NULL
-#' @param R2 indices for observations in untreated region, defaults to NULL
-#' @param zscore zscore for statistical significance, defaults to qnorm(0.975) i.e. 5 percent significance level
-#' @param K parameter controlling the penalization for thin plate regression splines, defaults to -1
-#' @param bs specify whether to use bootstrap for standard errors, defaults to FALSE
-#' @param bs_reps number of bootstrap iterations, defaults to 1000
-#' @param bs_seeds specify whether the random seed for the rth bootstrap iteration should be r, defaults to TRUE
-#' @param save_bayes_se indicate whether Bayesian standard errors should be saved, defaults to TRUE
-#' @param save_density_est specify whether kernel density estimates should be saved, defaults to TRUE
-#' @param save_fits specify whether fitted thin plate regression splines should be saved, defaults to true
-#' @param fuzzy specify whether this is a fuzzy RD, defaults to FALSE
-#' @param reverse specify whether the running variables are reversed (i.e. negative values are treated), defaults to FALSE
-#' @param undersmooth specify whether thin plate regression splines should be undersmoothed to reduce bias
-#' @param pred_dfs specify a dataframe with the values of the running variables that treatment effects should be predicted at, defaults to NULL
+#' @param Y Y is a vector for the dependent variable.
+#' @param X1 X1 is a vector for the first running variable.
+#' @param X2 X2 is a vector for the second running variable.
+#' @param W W is a vector containing dummy variables for whether the observation is treated. This defaults to NULL, and it is assumed to be a sharp RD where a unit is treated if and only if both running variables exceed their threshold. If it is in fact a fuzzy RD (so the fuzzy option is specified to be TRUE), then W must be specified.
+#' @param F1.range This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X2=0, and X1 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X1=0 to max(X1), at equal intervals.
+#' @param F2.range This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X1=0, and X2 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X2=0 to max(X2), at equal intervals.
+#' @param R1 The input for this option should be a vector containing indices for observations in treated region. Typically, this can be left blank, in which case R1 defaults to NULL.
+#' @param R2 The input for this option should be a vector containing indices for observations in untreated region. Typically, this can be left blank, in which case R2 defaults to NULL.
+#' @param zscore The input should be the z-score that should be used for statistical significance. If not specified, it defaults to qnorm(0.975) i.e. 5 percent significance level.
+#' @param K This is a parameter controlling the penalization for thin plate regression splines. Typically this is left empty, in which case K defaults to -1.
+#' @param bs The input should be a logical value indicating whether to use bootstrap for standard errors. If not specified, this option defaults to FALSE.
+#' @param bs_reps The input should be the number of desired bootstrap iterations. If not specified, this is option defaults to 1000.
+#' @param bs_seeds The input should be a logical value indicating whether the random seed for the rth bootstrap iteration should be set to r. If not specified, this option defaults to TRUE.
+#' @param save_bayes_se The input should be a logical value (TRUE or FALSE) indicating whether Bayesian standard errors should be saved.
+#' @param save_density_est The input should be a logical value indicating whether kernel density estimates should be saved. If the option is not specified, it defaults to TRUE.
+#' @param save_fits The input should be a logical value indicating whether the fitted thin plate regression splines should be saved. If the option is not specified, it defaults to TRUE.
+#' @param fuzzy The input should be a logical value (TRUE or FALSE) indicating whether this is a fuzzy RD. If this is not specified, the option defaults to FALSE (so the code assumes that this is a sharp RD).
+#' @param reverse The input should be a logical value (TRUE or FALSE) indicating whether the running variables are reversed (i.e. negative values are treated). If not specified, the option defaults to FALSE.
+#' @param undersmooth The input should be a logical value indicating whether thin plate regression splines should be undersmoothed, in order to reduce bias (for inference purposes).
+#' @param pred_dfs The input should be a dataframe with the values of the running variables that conditional average treatment effects should be calculated at. If left empty, it defaults to NULL.
 
 mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
                    R1 = NULL, R2 = NULL,

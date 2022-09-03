@@ -26,41 +26,41 @@ basic_est(
 )
 }
 \arguments{
-\item{Y}{outcome variable}
+\item{Y}{Y is a vector for the dependent variable.}
 
-\item{X1}{first running variable}
+\item{X1}{X1 is a vector for the first running variable.}
 
-\item{X2}{second running variable}
+\item{X2}{X2 is a vector for the second running variable.}
 
-\item{W}{whether the observation is treated. defaults to NULL, but must be specified if the fuzzy option is TRUE}
+\item{W}{W is a vector containing dummy variables for whether the observation is treated. This defaults to NULL, and it is assumed to be a sharp RD where a unit is treated if and only if both running variables exceed their threshold. If it is in fact a fuzzy RD (so the fuzzy option is specified to be TRUE), then W must be specified.}
 
-\item{F1.range}{range for the first running variable, defaults to NULL in which case the range is set to 0 to max(X1) with equal intervals}
+\item{F1.range}{This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X2=0, and X1 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X1=0 to max(X1), at equal intervals.}
 
-\item{F2.range}{range for the second running variable, defaults to NULL in which case the range is set to 0 to max(X2) with equal intervals}
+\item{F2.range}{This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X1=0, and X2 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X2=0 to max(X2), at equal intervals.}
 
-\item{R1}{indices for observations in treated region, defaults to NULL}
+\item{R1}{The input for this option should be a vector containing indices for observations in treated region. Typically, this can be left blank, in which case R1 defaults to NULL.}
 
-\item{R2}{indices for observations in untreated region, defaults to NULL}
+\item{R2}{The input for this option should be a vector containing indices for observations in untreated region. Typically, this can be left blank, in which case R2 defaults to NULL.}
 
-\item{K}{parameter controlling the penalization for thin plate regression splines, defaults to -1}
+\item{K}{This is a parameter controlling the penalization for thin plate regression splines. Typically this is left empty, in which case K defaults to -1.}
 
-\item{save_bayes_se}{indicate whether Bayesian standard errors should be saved}
+\item{save_bayes_se}{The input should be a logical value (TRUE or FALSE) indicating whether Bayesian standard errors should be saved.}
 
-\item{fuzzy}{specify whether this is a fuzzy RD, defaults to FALSE}
+\item{fuzzy}{The input should be a logical value (TRUE or FALSE) indicating whether this is a fuzzy RD. If this is not specified, the option defaults to FALSE (so the code assumes that this is a sharp RD).}
 
-\item{reverse}{specify whether the running variables are reversed (i.e. negative values are treated), defaults to FALSE}
+\item{reverse}{The input should be a logical value (TRUE or FALSE) indicating whether the running variables are reversed (i.e. negative values are treated). If not specified, the option defaults to FALSE.}
 
-\item{sp}{parameter for thin plate regression spline fitting}
+\item{sp}{This is a parameter for thin plate regression spline fitting, and can typically be left empty (in which case it defaults to NULL).}
 
-\item{save_fits}{specify whether fitted thin plate regression splines should be saved, defaults to true}
+\item{save_fits}{The input should be a logical value indicating whether the fitted thin plate regression splines should be saved. If the option is not specified, it defaults to TRUE.}
 
-\item{save_density_est}{specify whether kernel density estimates should be saved, defaults to TRUE}
+\item{save_density_est}{The input should be a logical value indicating whether kernel density estimates should be saved. If the option is not specified, it defaults to TRUE.}
 
-\item{pred_dfs}{specify a dataframe with the values of the running variables that treatment effects should be predicted at, defaults to NULL}
+\item{pred_dfs}{The input should be a dataframe with the values of the running variables that conditional average treatment effects should be calculated at. If left empty, it defaults to NULL.}
 
-\item{undersmooth}{specify whether thin plate regression splines should be undersmoothed to reduce bias}
+\item{undersmooth}{The input should be a logical value indicating whether thin plate regression splines should be undersmoothed, in order to reduce bias (for inference purposes).}
 
-\item{save_sp}{specify whether the parameter for thin plate regregression spline fitting should be saved, defaults to TRUE}
+\item{save_sp}{The input should be a logical value indicating whether the parameter for thin plate regression spline fitting should be saved. If not specified, it defaults to TRUE.}
 }
 \description{
 basic_est is a subfunction that does the basic MRD estimation

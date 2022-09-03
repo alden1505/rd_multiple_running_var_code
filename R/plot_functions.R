@@ -52,14 +52,14 @@ default_ggplot = function(df, my.colors, my_ylab, my_xlab, plot_ci = TRUE){
 #' @import mgcv
 #' @import Hmisc
 #' @import ggplot2
-#' @param x range for running variable
-#' @param est estimates of the treatment effects
-#' @param se standard error of estimated treatment effects
-#' @param legend title for legend
-#' @param reverse reverse the running variable, defaults to FALSE
-#' @param my.colors specify desired colors for plot, defaults to black
-#' @param my_xlab title for x-axis
-#' @param my_ylab title for y-axis
+#' @param x The input should be a vector containing the points at which the user wants to plot the conditional average treatment effect (CATE). To elaborate, the CATE can only be calculated at the boundary where one of the running variables is zero, and the other takes positive values, and this option specifies at which positive values the CATE should be plotted.
+#' @param est The input should be a vector containing treatment effect estimates, which should be the same length as x.
+#' @param se The input should be a vector containing point-wise standard errors for the treatment effect estimates, which should be the same length as x.
+#' @param legend The input be the title for legend.
+#' @param reverse The input should be a logical value (TRUE or FALSE) indicating whether the running variable is reversed (i.e. negative values are treated). If not specified, the option defaults to FALSE.
+#' @param my.colors The input should be the desired colors for plot. If left empty, the default color is black.
+#' @param my_xlab The input should be the title of the x-axis.
+#' @param my_ylab The input should be the title of the y-axis.
 #' @keywords basic_plot
 #' @export
 
