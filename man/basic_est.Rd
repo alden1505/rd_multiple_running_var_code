@@ -11,16 +11,17 @@ basic_est(
   W = NULL,
   F1.range = NULL,
   F2.range = NULL,
+  mrk,
+  eps,
   R1 = NULL,
   R2 = NULL,
   K = -1,
-  save_bayes_se = TRUE,
   fuzzy = FALSE,
   reverse = FALSE,
-  sp = NULL,
   save_fits = TRUE,
   save_density_est = TRUE,
   pred_dfs = NULL,
+  bc,
   undersmooth,
   save_sp = TRUE
 )
@@ -38,19 +39,19 @@ basic_est(
 
 \item{F2.range}{This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X1=0, and X2 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X2=0 to max(X2), at equal intervals.}
 
+\item{mrk}{This indicates whether we want to estimate a multidimensional regression kink design.}
+
+\item{eps}{This value indicates the step size used for the numerical derivative computation in the MRK estimation.}
+
 \item{R1}{The input for this option should be a vector containing indices for observations in treated region. Typically, this can be left blank, in which case R1 defaults to NULL.}
 
 \item{R2}{The input for this option should be a vector containing indices for observations in untreated region. Typically, this can be left blank, in which case R2 defaults to NULL.}
 
 \item{K}{This is a parameter controlling the penalization for thin plate regression splines. Typically this is left empty, in which case K defaults to -1.}
 
-\item{save_bayes_se}{The input should be a logical value (TRUE or FALSE) indicating whether Bayesian standard errors should be saved.}
-
 \item{fuzzy}{The input should be a logical value (TRUE or FALSE) indicating whether this is a fuzzy RD. If this is not specified, the option defaults to FALSE (so the code assumes that this is a sharp RD).}
 
-\item{reverse}{The input should be a logical value (TRUE or FALSE) indicating whether the running variables are reversed (i.e. negative values are treated). If not specified, the option defaults to FALSE.}
-
-\item{sp}{This is a parameter for thin plate regression spline fitting, and can typically be left empty (in which case it defaults to NULL).}
+\item{reverse}{The input should be a logical value (TRUE or FALSE) indicating whether the treatment is reversed, i.e., what is defined as the "treatment group" for purposes of the MRD due to the region of the running variable space that defines it is is actually the control for the empirical application.}
 
 \item{save_fits}{The input should be a logical value indicating whether the fitted thin plate regression splines should be saved. If the option is not specified, it defaults to TRUE.}
 
@@ -58,7 +59,9 @@ basic_est(
 
 \item{pred_dfs}{The input should be a dataframe with the values of the running variables that conditional average treatment effects should be calculated at. If left empty, it defaults to NULL.}
 
-\item{undersmooth}{The input should be a logical value indicating whether thin plate regression splines should be undersmoothed, in order to reduce bias (for inference purposes).}
+\item{bc}{The input should be a logical value indicating whether the thin plate regression splines should be undersmoothed by using the MSE-optimal penalty parameter from a higher-order spline as the penalty parameter for the splines actually used to compute the treatment effects.}
+
+\item{undersmooth}{The input should be a logical value indicating whether thin plate regression splines should be undersmoothed by dividing the MSE-optimal penalty parameter by two, in order to reduce bias (for inference purposes).}
 
 \item{save_sp}{The input should be a logical value indicating whether the parameter for thin plate regression spline fitting should be saved. If not specified, it defaults to TRUE.}
 }

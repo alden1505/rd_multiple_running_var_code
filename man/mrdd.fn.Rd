@@ -11,20 +11,27 @@ mrdd.fn(
   W = NULL,
   F1.range = NULL,
   F2.range = NULL,
+  mrk = FALSE,
+  sharp_mrk = TRUE,
+  sharp_mrd = FALSE,
+  eps = 10^(-7),
   R1 = NULL,
   R2 = NULL,
-  zscore = qnorm(0.975),
+  signif_lvl = 0.05,
   K = -1,
   bs = FALSE,
   bs_reps = 1000,
   bs_seeds = TRUE,
-  save_bayes_se = TRUE,
   save_density_est = TRUE,
   save_fits = TRUE,
   fuzzy = FALSE,
   reverse = FALSE,
+  fn_ci = TRUE,
+  reps_fn_ci = 1000,
+  bc = TRUE,
   undersmooth = TRUE,
-  pred_dfs = NULL
+  pred_dfs = NULL,
+  bs_print = 100
 )
 }
 \arguments{
@@ -40,11 +47,19 @@ mrdd.fn(
 
 \item{F2.range}{This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X1=0, and X2 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X2=0 to max(X2), at equal intervals.}
 
+\item{mrk}{This indicates whether we want to estimate a multidimensional regression kink design.}
+
+\item{sharp_mrk}{This indicates whether this is a sharp MRK design. If this is set to TRUE, then analytic standard errors for the MRK estimate are computed ignoring the estimation uncertainty in the denominator.}
+
+\item{sharp_mrd}{This indicates whether this is a sharp MRD design. If this is set to TRUE but the denominator is also estimated, then analytic standard errors for the MRD estimate are computed ignoring the estimation uncertainty in the denominator.}
+
+\item{eps}{This value indicates the step size used for the numerical derivative computation in the MRK estimation.}
+
 \item{R1}{The input for this option should be a vector containing indices for observations in treated region. Typically, this can be left blank, in which case R1 defaults to NULL.}
 
 \item{R2}{The input for this option should be a vector containing indices for observations in untreated region. Typically, this can be left blank, in which case R2 defaults to NULL.}
 
-\item{zscore}{The input should be the z-score that should be used for statistical significance. If not specified, it defaults to qnorm(0.975) i.e. 5 percent significance level.}
+\item{signif_lvl}{The indicates the statistical significance level for computing the simultaneous confidence band. If left empty, this defaults to the 5 percent significance level.}
 
 \item{K}{This is a parameter controlling the penalization for thin plate regression splines. Typically this is left empty, in which case K defaults to -1.}
 
@@ -54,19 +69,25 @@ mrdd.fn(
 
 \item{bs_seeds}{The input should be a logical value indicating whether the random seed for the rth bootstrap iteration should be set to r. If not specified, this option defaults to TRUE.}
 
-\item{save_bayes_se}{The input should be a logical value (TRUE or FALSE) indicating whether Bayesian standard errors should be saved.}
-
 \item{save_density_est}{The input should be a logical value indicating whether kernel density estimates should be saved. If the option is not specified, it defaults to TRUE.}
 
 \item{save_fits}{The input should be a logical value indicating whether the fitted thin plate regression splines should be saved. If the option is not specified, it defaults to TRUE.}
 
 \item{fuzzy}{The input should be a logical value (TRUE or FALSE) indicating whether this is a fuzzy RD. If this is not specified, the option defaults to FALSE (so the code assumes that this is a sharp RD).}
 
-\item{reverse}{The input should be a logical value (TRUE or FALSE) indicating whether the running variables are reversed (i.e. negative values are treated). If not specified, the option defaults to FALSE.}
+\item{reverse}{The input should be a logical value (TRUE or FALSE) indicating whether the treatment is reversed, i.e., what is defined as the "treatment group" for purposes of the MRD due to the region of the running variable space that defines it is is actually the control for the empirical application.}
 
-\item{undersmooth}{The input should be a logical value indicating whether thin plate regression splines should be undersmoothed, in order to reduce bias (for inference purposes).}
+\item{fn_ci}{This indicates whether simultaneous confidence bands should be computed for the CATE estimates along the treatment frontier.}
+
+\item{reps_fn_ci}{This indicates the number of simulation draws to be used for computing the simultaneous confidence bands for the CATE estimates.}
+
+\item{bc}{The input should be a logical value indicating whether the thin plate regression splines should be undersmoothed by using the MSE-optimal penalty parameter from a higher-order spline as the penalty parameter for the splines actually used to compute the treatment effects.}
+
+\item{undersmooth}{The input should be a logical value indicating whether thin plate regression splines should be undersmoothed by dividing the MSE-optimal penalty parameter by two, in order to reduce bias (for inference purposes).}
 
 \item{pred_dfs}{The input should be a dataframe with the values of the running variables that conditional average treatment effects should be calculated at. If left empty, it defaults to NULL.}
+
+\item{bs_print}{This indicates the multiples at which bootstrap iterations should be printed (if the bs option is set to TRUE).}
 }
 \description{
 mrdd.fn is the main function for MRD estimation
