@@ -13,6 +13,7 @@
 #' @param F1.range This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X2=0, and X1 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X1=0 to max(X1), at equal intervals.
 #' @param F2.range This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X1=0, and X2 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X2=0 to max(X2), at equal intervals.
 #' @param mrk This indicates whether we want to estimate a multidimensional regression kink design.
+#' @param kink This indicates whether we want to estimate a derivative discontinuity at the threshold. This option is typically used when we don't have an MRK/MRDK design but still want to estimate a discontinuity in the derivative.
 #' @param eps This value indicates the step size used for the numerical derivative computation in the MRK estimation.
 #' @param R1 The input for this option should be a vector containing indices for observations in treated region. Typically, this can be left blank, in which case R1 defaults to NULL.
 #' @param R2 The input for this option should be a vector containing indices for observations in untreated region. Typically, this can be left blank, in which case R2 defaults to NULL.
@@ -29,7 +30,7 @@
 #' @export
 
 basic_est = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
-                     mrk, eps,
+                     mrk, kink, eps,
                      R1 = NULL, R2 = NULL, K = -1,
                      fuzzy = FALSE, reverse = FALSE,
                      save_fits = TRUE, save_density_est = TRUE,
@@ -127,7 +128,7 @@ basic_est = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
         if (undersmooth){
           preds_us[[e]][[f]][[r]] = predict(fits_us[[e]][[r]], pred_dfs[[f]], se.fit = TRUE)
         }
-        if (mrk){
+        if (mrk | kink){
           # Create prediction data frames for numerical derivative estimation
           if (f == 1){
             pred_df_new1 = pred_dfs[[f]]
@@ -213,7 +214,7 @@ basic_est = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
       if (undersmooth){
         tau_us[[e]]$pw[[f]] = preds_us[[e]][[f]][[1]]$fit - preds_us[[e]][[f]][[2]]$fit
       }
-      if (mrk){
+      if (mrk | kink){
         if (f == 1){
           tau_mrk[[e]]$pw[[f]] = preds_mrk[[e]][[f]][[1]]$partial_X1 - preds_mrk[[e]][[f]][[2]]$partial_X1
           if (bc){
@@ -242,7 +243,7 @@ basic_est = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
       if (undersmooth){
         tau_us[[e]]$pw[[f]] = -tau_us[[e]]$pw[[f]]
       }
-      if (mrk){
+      if (mrk | kink){
         tau_mrk[[e]]$pw[[f]] = -tau_mrk[[e]]$pw[[f]]
         if (bc){
           tau_mrk_bc[[e]]$pw[[f]] = -tau_mrk_bc[[e]]$pw[[f]]
@@ -274,18 +275,18 @@ basic_est = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
     # Aggregate CATE estimates over the two segments of the treatment frontier
     for (e in 1:E){
       tau[[e]]$agg[[f]] = sum(tau[[e]]$pw[[f]]*kernel_est$mass[[f]])
-      if (mrk){
+      if (mrk | kink){
         tau_mrk[[e]]$agg[[f]] = sum(tau_mrk[[e]]$pw[[f]]*kernel_est$mass[[f]])
       }
       if (bc){
         tau_bc[[e]]$agg[[f]] = sum(tau_bc[[e]]$pw[[f]]*kernel_est$mass[[f]])
-        if (mrk){
+        if (mrk | kink){
           tau_mrk_bc[[e]]$agg[[f]] = sum(tau_mrk_bc[[e]]$pw[[f]]*kernel_est$mass[[f]])
         }
       }
       if (undersmooth){
         tau_us[[e]]$agg[[f]] = sum(tau_us[[e]]$pw[[f]]*kernel_est$mass[[f]])
-        if (mrk){
+        if (mrk | kink){
           tau_mrk_us[[e]]$agg[[f]] = sum(tau_mrk_us[[e]]$pw[[f]]*kernel_est$mass[[f]])
         }
       }
@@ -296,13 +297,13 @@ basic_est = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
   for (e in 1:E){
     tau[[e]]$agg[[3]] = sum(c(tau[[e]]$pw[[1]],tau[[e]]$pw[[2]])*
                               kernel_est$mass[[3]])
-    if (mrk){
+    if (mrk | kink){
       tau_mrk[[e]]$agg[[3]] = sum(c(tau_mrk[[e]]$pw$F1,tau_mrk[[e]]$pw$F2)*kernel_est$mass[[3]])
     }
     if (bc){
       tau_bc[[e]]$agg[[3]] = sum(c(tau_bc[[e]]$pw[[1]],tau_bc[[e]]$pw[[2]])*
                                    kernel_est$mass[[3]])
-      if (mrk){
+      if (mrk | kink){
         tau_mrk_bc[[e]]$agg[[3]] = sum(c(tau_mrk_bc[[e]]$pw$F1,tau_mrk_bc[[e]]$pw$F2)*
                                          kernel_est$mass[[3]])
       }
@@ -310,16 +311,16 @@ basic_est = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
     if (undersmooth){
       tau_us[[e]]$agg[[3]] = sum(c(tau_us[[e]]$pw[[1]],tau_us[[e]]$pw[[2]])*
                                    kernel_est$mass[[3]])
-      if (mrk){
+      if (mrk | kink){
         tau_mrk_us[[e]]$agg[[3]] = sum(c(tau_mrk_us[[e]]$pw$F1,tau_mrk_us[[e]]$pw$F2)*
                                          kernel_est$mass[[3]])
       }
     }
   }
   # Save Bayesian standard errors if desired
-  tau_se = list(reduced = list(pw = list(bayes = list()),
+  tau_se = list(reduced = list(pw = list(bayes = list(list(F1=list(), F2=list()))),
                                agg=list(delta = list(F1=list(), F2=list(), all=list()))),
-                stage1 = list(pw = list(bayes = list()),
+                stage1 = list(pw = list(bayes = list(list(F1=list(), F2=list()))),
                               agg=list(delta = list(F1=list(), F2=list(), all=list()))))
   tau_se_bc = tau_se
   tau_se_us = tau_se
@@ -392,6 +393,7 @@ basic_est = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
 #' @param F1.range This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X2=0, and X1 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X1=0 to max(X1), at equal intervals.
 #' @param F2.range This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X1=0, and X2 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X2=0 to max(X2), at equal intervals.
 #' @param mrk This indicates whether we want to estimate a multidimensional regression kink design.
+#' @param kink This indicates whether we want to estimate a derivative discontinuity at the threshold. This option is typically used when we don't have an MRK/MRDK design but still want to estimate a discontinuity in the derivative.
 #' @param sharp_mrk This indicates whether this is a sharp MRK design. If this is set to TRUE, then analytic standard errors for the MRK estimate are computed ignoring the estimation uncertainty in the denominator.
 #' @param sharp_mrd This indicates whether this is a sharp MRD design. If this is set to TRUE but the denominator is also estimated, then analytic standard errors for the MRD estimate are computed ignoring the estimation uncertainty in the denominator.
 #' @param eps This value indicates the step size used for the numerical derivative computation in the MRK estimation.
@@ -414,7 +416,7 @@ basic_est = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
 #' @param bs_print This indicates the multiples at which bootstrap iterations should be printed (if the bs option is set to TRUE).
 
 mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
-                   mrk = FALSE, sharp_mrk = TRUE, sharp_mrd = FALSE, eps = 10^(-7),
+                   mrk = FALSE, kink = TRUE, sharp_mrk = TRUE, sharp_mrd = FALSE, eps = 10^(-7),
                    R1 = NULL, R2 = NULL,
                    signif_lvl = 0.05, K = -1,
                    bs = FALSE, bs_reps = 1000, bs_seeds = TRUE,
@@ -425,6 +427,9 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
   if (mrk){
     fuzzy = 1
   }
+  if (!mrk){
+    sharp_mrk = FALSE
+  }
   zscore = qnorm(1-signif_lvl/2)
   if (is.null(F1.range)){
     F1.range = seq(0, max(X2), length = 100)
@@ -434,7 +439,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
   }
   # Main estimates
   main_est = basic_est(Y = Y, X1 = X1, X2 = X2, W = W, K = K,
-                       mrk = mrk, eps=eps,
+                       mrk = mrk, kink = kink, eps=eps,
                        F1.range = F1.range, F2.range = F2.range, R1 = R1, R2 = R2,
                        save_density_est = save_density_est,
                        fuzzy=fuzzy, reverse = reverse,
@@ -492,7 +497,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
           matrix(nrow = length(main_est$tau_us$reduced$pw[[f]]), ncol = bs_reps)
         bs_est_us[[e]]$agg[[f]] = rep(NA, bs_reps)
       }
-      if (mrk){
+      if (mrk | kink){
         bs_est_mrk[[e]]$pw[[f]] =
           matrix(nrow = length(main_est$tau_mrk$reduced$pw[[f]]), ncol = bs_reps)
         bs_est_mrk[[e]]$agg[[f]] = rep(NA, bs_reps)
@@ -515,7 +520,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
     if (undersmooth){
       bs_est_us[[e]]$agg[[3]] = rep(NA, bs_reps)
     }
-    if (mrk){
+    if (mrk | kink){
       bs_est_mrk[[e]]$agg[[3]] = rep(NA, bs_reps)
       if (bc){
         bs_est_mrk_bc[[e]]$agg[[3]] = rep(NA, bs_reps)
@@ -567,7 +572,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
         bs_W = W[bs_indices]
       }
       current_bs_est = basic_est(Y = bs_Y, X1 = bs_X1, X2 = bs_X2, W = bs_W, K=K,
-                                 mrk = mrk, eps=eps,
+                                 mrk = mrk, kink = kink, eps=eps,
                                  F1.range = F1.range, F2.range = F2.range, R1 = R1, R2 = R2,
                                  save_density_est = save_density_est,
                                  fuzzy=fuzzy, reverse = reverse,
@@ -585,7 +590,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
             bs_est_us[[e]]$pw[[f]][,b] = current_bs_est$tau_us[[e]]$pw[[f]]
             bs_est_us[[e]]$agg[[f]][b] = current_bs_est$tau_us[[e]]$agg[[f]]
           }
-          if (mrk){
+          if (mrk | kink){
             bs_est_mrk[[e]]$pw[[f]][,b] = current_bs_est$tau_mrk[[e]]$pw[[f]]
             bs_est_mrk[[e]]$agg[[f]][b] = current_bs_est$tau_mrk[[e]]$agg[[f]]
             if (bc){
@@ -605,7 +610,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
         if (undersmooth){
           bs_est_us[[e]]$agg[[3]][b] = current_bs_est$tau_us[[e]]$agg[[3]]
         }
-        if (mrk){
+        if (mrk | kink){
           bs_est_mrk[[e]]$agg[[3]][b] = current_bs_est$tau_mrk[[e]]$agg[[3]]
           if (bc){
             bs_est_mrk_bc[[e]]$agg[[3]][b] = current_bs_est$tau_mrk_bc[[e]]$agg[[3]]
@@ -680,7 +685,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
         predict(main_est$fits[[e]][[2]], pred_dfs[[f]], type = "lpmatrix") %*% 
         main_est$fits[[e]][[2]]$Vp %*%
         t(predict(main_est$fits[[e]][[2]], pred_dfs[[f]], type = "lpmatrix"))
-      if (mrk){
+      if (mrk | kink){
         if (f == 1){
           var_mat_mrk[[e]][[f]] = 
             main_est$preds_mrk[[e]][[f]][[1]]$basis_partial_X1 %*% 
@@ -711,7 +716,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
       tau_se[[e]]$agg$delta[[f]] = sqrt(t(Deriv_wrt_tau) %*% var_mat[[e]][[f]] %*% Deriv_wrt_tau + 
                                           t(Deriv_wrt_f) %*% var_mat$density_est[[f]] %*% Deriv_wrt_f)
       # Compute standard error for aggregated MRK treatment effect estimate using the delta method
-      if (mrk){
+      if (mrk | kink){
         var_mat_mrk$density_est[[f]] = var_mat$density_est[[f]]
         Deriv_wrt_f_mrk = as.numeric( (1/(sum(main_est$density_preds[[f]]))^2) * 
                                         ( sum(main_est$density_preds[[f]]) * main_est$tau_mrk[[e]]$pw[[f]] - 
@@ -731,7 +736,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
           predict(main_est$fits_bc[[e]][[2]], pred_dfs[[f]], type = "lpmatrix") %*% 
           main_est$fits_bc[[e]][[2]]$Vp %*%
           t(predict(main_est$fits_bc[[e]][[2]], pred_dfs[[f]], type = "lpmatrix"))
-        if (mrk){
+        if (mrk | kink){
           if (f == 1){
             var_mat_mrk_bc[[e]][[f]] = 
               main_est$preds_mrk_bc[[e]][[f]][[1]]$basis_partial_X1 %*% 
@@ -762,7 +767,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
         tau_se_bc[[e]]$agg$delta[[f]] = sqrt(t(Deriv_wrt_tau) %*% var_mat_bc[[e]][[f]] %*% Deriv_wrt_tau + 
                                                t(Deriv_wrt_f) %*% var_mat_bc$density_est[[f]] %*% Deriv_wrt_f)
         # Compute standard error for aggregated MRK treatment effect estimate using delta method
-        if (mrk){
+        if (mrk | kink){
           var_mat_mrk_bc$density_est[[f]] = var_mat$density_est[[f]]
           Deriv_wrt_f_mrk_bc = as.numeric( (1/(sum(main_est$density_preds[[f]]))^2) * 
                                              ( sum(main_est$density_preds[[f]]) * main_est$tau_mrk_bc[[e]]$pw[[f]] - 
@@ -783,7 +788,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
           predict(main_est$fits_us[[e]][[2]], pred_dfs[[f]], type = "lpmatrix") %*% 
           main_est$fits_us[[e]][[2]]$Vp %*%
           t(predict(main_est$fits_us[[e]][[2]], pred_dfs[[f]], type = "lpmatrix"))
-        if (mrk){
+        if (mrk | kink){
           if (f == 1){
             var_mat_mrk_us[[e]][[f]] = 
               main_est$preds_mrk_us[[e]][[f]][[1]]$basis_partial_X1 %*% 
@@ -814,7 +819,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
         tau_se_us[[e]]$agg$delta[[f]] = sqrt(t(Deriv_wrt_tau) %*% var_mat_us[[e]][[f]] %*% Deriv_wrt_tau + 
                                                t(Deriv_wrt_f) %*% var_mat_us$density_est[[f]] %*% Deriv_wrt_f)
         # Compute standard error for aggregated MRK treatment effect estimate using delta method
-        if (mrk){
+        if (mrk | kink){
           var_mat_mrk_us$density_est[[f]] = var_mat$density_est[[f]]
           Deriv_wrt_f_mrk_us = as.numeric( (1/(sum(main_est$density_preds[[f]]))^2) * 
                                              ( sum(main_est$density_preds[[f]]) * main_est$tau_mrk_us[[e]]$pw[[f]] - 
@@ -871,7 +876,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
       tau_se_us[[e]]$agg$delta[[3]] = sqrt(t(Deriv_wrt_tau) %*% var_mat_us[[e]][[3]] %*% Deriv_wrt_tau + 
                                              t(Deriv_wrt_f_us) %*% var_mat_us$density_est[[3]] %*% Deriv_wrt_f_us)
     }
-    if (mrk){
+    if (mrk | kink){
       var_mat_mrk$density_est[[3]] = var_mat$density_est[[3]]
       var_mat_mrk[[e]][[3]] = 
         rbind(main_est$preds_mrk[[e]][[1]][[1]]$basis_partial_X1, main_est$preds_mrk[[e]][[2]][[1]]$basis_partial_X2) %*% 
@@ -1039,7 +1044,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
       if (undersmooth){
         tau_se_us[[e]]$agg$bs[[3]] = sd(bs_est_us[[e]]$agg[[3]])
       }
-      if (mrk){
+      if (mrk | kink){
         tau_se_mrk[[e]]$pw$bs = list(F1 = list(), F2 = list())
         tau_se_mrk[[e]]$agg$bs = list(F1 = list(), F2 = list(), all = list())
         if (bc){
@@ -1078,7 +1083,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
   if (fn_ci){
     results$fn_cov$fn_ci_crit = fn_ci_crit
   }
-  if (mrk){
+  if (mrk | kink){
     results$tau_se_mrk = tau_se_mrk
   }
   
@@ -1091,7 +1096,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
     if (fn_ci){
       results$fn_cov$fn_ci_crit_bc = fn_ci_crit_bc
     }
-    if (mrk){
+    if (mrk | kink){
       results$tau_mrk_bc = main_est$tau_mrk_bc
       results$tau_se_mrk_bc = tau_se_mrk_bc
     }
@@ -1106,7 +1111,7 @@ mrdd.fn = function(Y, X1, X2, W = NULL, F1.range = NULL, F2.range = NULL,
     if (fn_ci){
       results$fn_cov$fn_ci_crit_us = fn_ci_crit_us
     }
-    if (mrk){
+    if (mrk | kink){
       results$tau_mrk_us = main_est$tau_mrk_us
       results$tau_se_mrk_us = tau_se_mrk_us
     }

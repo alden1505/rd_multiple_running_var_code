@@ -8,6 +8,7 @@
 #' @import Hmisc
 #' @import ggplot2
 #' @param df ggplot dataframe
+#' @param my_ylim optional numeric vector specifying the limits for the y-axis
 #' @param my.colors specify desired colors for plot
 #' @param my_ylab title for y-axis
 #' @param my_xlab title for x-axis
@@ -15,18 +16,16 @@
 #' @keywords plot_subfn
 #' @export
 
-default_ggplot = function(df, my.colors, my_ylab, my_xlab, plot_ci = TRUE){
+default_ggplot = function(df, my.colors, my_ylim = NULL, my_ylab, my_xlab, plot_ci = TRUE, crit_val = NULL){
   my_plot = ggplot(data = df, aes(x = xaxis, y = treatment,
                                   group = type, shape = type,
                                   colour = type, fill = type)) +
-    geom_line(aes(linetype = type), size = 1) +
+    geom_line(aes(linetype = type), linewidth = 1) +
     geom_hline(aes(yintercept = 0), linetype = "dashed") +
     scale_color_manual(values = my.colors) +
     scale_fill_manual(values = my.colors) +
     scale_linetype_manual(values = c(1,1,0)) +
     xlim(c( min(df$x), max(df$x) )) +
-    ylim( c( min(c(0, df$lower, df$treatment), na.rm = TRUE),
-             max(c(0, df$upper, df$treatment), na.rm = TRUE) ) ) +
     theme_classic() +
     theme(axis.line.x = element_line(color = "black"),
           axis.line.y = element_line(color = "black")) +
@@ -35,10 +34,17 @@ default_ggplot = function(df, my.colors, my_ylab, my_xlab, plot_ci = TRUE){
     theme(legend.title = element_blank(),
           legend.text = element_text(size=16)) + 
     labs(y = my_ylab, x = my_xlab)
-  if (plot_ci){
-    my_plot + geom_ribbon(aes(x = xaxis, ymin = lower, ymax = upper,
-                              fill = type), linetype = 0,  alpha = 0.1)
+  if (is.null(my_ylim)){
+    my_plot = my_plot + ylim( c( min(c(0, df$lower, df$treatment), na.rm = TRUE),
+                                 max(c(0, df$upper, df$treatment), na.rm = TRUE) ) )
+  }else{
+    my_plot = my_plot + ylim(my_ylim)
   }
+  if (plot_ci){
+    my_plot = my_plot + geom_ribbon(aes(x = xaxis, ymin = lower, ymax = upper,
+                                        fill = type), linetype = 0,  alpha = 0.1)
+  }
+  my_plot
 }
 
 #' Function to create basic MRD plot
@@ -57,32 +63,36 @@ default_ggplot = function(df, my.colors, my_ylab, my_xlab, plot_ci = TRUE){
 #' @param se The input should be a vector containing point-wise standard errors for the treatment effect estimates, which should be the same length as x.
 #' @param legend The input be the title for legend.
 #' @param reverse The input should be a logical value (TRUE or FALSE) indicating whether the running variable is reversed (i.e. negative values are treated). If not specified, the option defaults to FALSE.
+#' @param my_ylim optional numeric vector specifying the limits for the y-axis
 #' @param my.colors The input should be the desired colors for plot. If left empty, the default color is black.
 #' @param my_xlab The input should be the title of the x-axis.
 #' @param my_ylab The input should be the title of the y-axis.
 #' @keywords basic_plot
 #' @export
 
-create_plot = function(x, est, se,
+create_plot = function(x, est, se, crit_val = NULL,
                        legend = "MRD", reverse = FALSE,
-                       my.colors = "black",
+                       my_ylim = NULL, my.colors = "black",
                        my_xlab, my_ylab){
+  if (is.null(crit_val)){
+    crit_val = qnorm(0.975)
+  }
   if (reverse){
     df = data.frame(xaxis = x,
                     treatment = -est,
-                    lower = -est - qnorm(0.975)*se,
-                    upper = -est + qnorm(0.975)*se,
+                    lower = -est - crit_val*se,
+                    upper = -est + crit_val*se,
                     type = factor (rep( legend, each = length(x) ),
                                    levels = legend ) )
   }else{
     df = data.frame(xaxis = x,
                     treatment = est,
-                    lower = est - qnorm(0.975)*se,
-                    upper = est + qnorm(0.975)*se,
+                    lower = est - crit_val*se,
+                    upper = est + crit_val*se,
                     type = factor (rep( legend, each = length(x) ),
                                    levels = legend ) )
   }
-  my_plot = default_ggplot(df, my.colors, my_ylab, my_xlab)
+  my_plot = default_ggplot(df = df, my_ylim = my_ylim, my.colors = my.colors, my_ylab = my_ylab, my_xlab = my_xlab)
   return(my_plot)
 }
 
