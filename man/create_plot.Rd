@@ -8,8 +8,10 @@ create_plot(
   x,
   est,
   se,
+  crit_val = NULL,
   legend = "MRD",
   reverse = FALSE,
+  my_ylim = NULL,
   my.colors = "black",
   my_xlab,
   my_ylab
@@ -25,6 +27,8 @@ create_plot(
 \item{legend}{The input be the title for legend.}
 
 \item{reverse}{The input should be a logical value (TRUE or FALSE) indicating whether the running variable is reversed (i.e. negative values are treated). If not specified, the option defaults to FALSE.}
+
+\item{my_ylim}{optional numeric vector specifying the limits for the y-axis}
 
 \item{my.colors}{The input should be the desired colors for plot. If left empty, the default color is black.}
 

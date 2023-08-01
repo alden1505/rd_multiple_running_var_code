@@ -12,6 +12,7 @@ basic_est(
   F1.range = NULL,
   F2.range = NULL,
   mrk,
+  kink,
   eps,
   R1 = NULL,
   R2 = NULL,
@@ -40,6 +41,8 @@ basic_est(
 \item{F2.range}{This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X1=0, and X2 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X2=0 to max(X2), at equal intervals.}
 
 \item{mrk}{This indicates whether we want to estimate a multidimensional regression kink design.}
+
+\item{kink}{This indicates whether we want to estimate a derivative discontinuity at the threshold. This option is typically used when we don't have an MRK/MRDK design but still want to estimate a discontinuity in the derivative.}
 
 \item{eps}{This value indicates the step size used for the numerical derivative computation in the MRK estimation.}
 

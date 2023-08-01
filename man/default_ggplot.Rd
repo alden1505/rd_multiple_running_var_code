@@ -4,12 +4,22 @@
 \alias{default_ggplot}
 \title{Subfunction for plotting}
 \usage{
-default_ggplot(df, my.colors, my_ylab, my_xlab, plot_ci = TRUE)
+default_ggplot(
+  df,
+  my.colors,
+  my_ylim = NULL,
+  my_ylab,
+  my_xlab,
+  plot_ci = TRUE,
+  crit_val = NULL
+)
 }
 \arguments{
 \item{df}{ggplot dataframe}
 
 \item{my.colors}{specify desired colors for plot}
+
+\item{my_ylim}{optional numeric vector specifying the limits for the y-axis}
 
 \item{my_ylab}{title for y-axis}
 

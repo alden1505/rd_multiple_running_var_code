@@ -12,6 +12,7 @@ mrdd.fn(
   F1.range = NULL,
   F2.range = NULL,
   mrk = FALSE,
+  kink = TRUE,
   sharp_mrk = TRUE,
   sharp_mrd = FALSE,
   eps = 10^(-7),
@@ -48,6 +49,8 @@ mrdd.fn(
 \item{F2.range}{This is the points at which the user wants to compute the conditional average treatment effect at the boundary where X1=0, and X2 is positive. The default for this option is NULL, in which case the conditional average treatment effect is computed from X2=0 to max(X2), at equal intervals.}
 
 \item{mrk}{This indicates whether we want to estimate a multidimensional regression kink design.}
+
+\item{kink}{This indicates whether we want to estimate a derivative discontinuity at the threshold. This option is typically used when we don't have an MRK/MRDK design but still want to estimate a discontinuity in the derivative.}
 
 \item{sharp_mrk}{This indicates whether this is a sharp MRK design. If this is set to TRUE, then analytic standard errors for the MRK estimate are computed ignoring the estimation uncertainty in the denominator.}
 
