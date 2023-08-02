@@ -2,7 +2,7 @@
 % Please edit documentation in R/mrdd_function.R
 \name{mrdd.fn}
 \alias{mrdd.fn}
-\title{Main function for estimation of regression discontinuity designs with two running variables (MRD)}
+\title{Main function for MRD estimation.}
 \usage{
 mrdd.fn(
   Y,
@@ -105,5 +105,6 @@ Many variations of the sublists mentioned above are included in the brief descri
 The terms "reduced", "stage1", and "late" are borrowed from the instrumental variables literature. For sharp MRD designs, the MRD estimate corresponds to the results under "reduced". For fuzzy designs (and MRK designs), "reduced" and "stage1" correspond to the numerator and denominator of the Wald ratio, and the MRD (or MRK) treatment effect is given by the Wald ratio itself, abbreviated as "late" (short for local average treatment effect).
 }
 \description{
-mrdd.fn is the main function for MRD estimation
+This function carries out estimation for regression discontinuity designs with two running variables (MRD) and regression kink designs with two running variables (MRK).
+The function is written assuming that the treatment frontier (i.e., the boundary in running variable space dividing the treated and untreated regions) is given by the positive X1 and X2 axes. In some empirical applications where these are not the exact conditions for program eligibility (e.g., the threshold is not zero, a running variable must fall below instead of above a threshold, or observations in the positive quadrant are untreated), a simple redefinition of the running variables (e.g., through translation or by multiplying by negative one) or a redefinition of treatment (to label treated units as untreated, and then multiplying the final estimates by negative one) is all that is necessary. In cases where the treatment frontier is still a boundary separating treated and untreated regions but is not given by two straight lines forming a right angle, this function can still be used in principle (by explicitly specifying the indices for treated and untreated regions via "R1" and "R2", and by specifying the coordinates of the treatment frontier via "pred_dfs"), but this functionality has not been extensively tested. Please feel free to contact the author with questions at alden15@nber.org.
 }
